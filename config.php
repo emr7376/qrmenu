@@ -27,10 +27,15 @@ define('OM_UPLOAD_URL', '/uploads');
 
 // Görsel depolama (logo/galeri/ürün fotoğrafları) — Render'da disk kalıcı olmadığı için
 // her deploy'da yerel dosyalar silinir.
-// ÖNCELİK 1: imgbb.com — kart istemez, imzalama gerektirmez, tek API key ile çalışır
-// (R2/Backblaze B2 "public bucket" adımında kart istediği için tercih edildi).
+// ÖNCELİK 1: Cloudinary — kart istemez, sunucudan-sunucuya (server-to-server) yüklemeye izin verir.
+// cloudinary.com'da ücretsiz hesap açınca Dashboard'da "Cloud name", "API Key", "API Secret" görünür.
+define('OM_CLOUDINARY_CLOUD_NAME', getenv('OM_CLOUDINARY_CLOUD_NAME') ?: '');
+define('OM_CLOUDINARY_API_KEY', getenv('OM_CLOUDINARY_API_KEY') ?: '');
+define('OM_CLOUDINARY_API_SECRET', getenv('OM_CLOUDINARY_API_SECRET') ?: '');
+// ÖNCELİK 2 (ARTIK KULLANILMIYOR — Render'ın datacenter IP'sini "forbidden" (kod 103) ile
+// engelliyor, 2026-07-07'de canlıda tespit edildi). Kod yedek olarak duruyor, silinmedi.
 define('OM_IMGBB_API_KEY', getenv('OM_IMGBB_API_KEY') ?: '');
-// ÖNCELİK 2 (opsiyonel/yedek): Herhangi bir S3 UYUMLU servis (Cloudflare R2, Backblaze B2, vb.)
+// ÖNCELİK 3 (opsiyonel/yedek): Herhangi bir S3 UYUMLU servis (Cloudflare R2, Backblaze B2, vb.)
 // bilgileri girilirse app/Storage.php görselleri oraya yükler.
 // İkisi de boşsa (yerel geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
 // OM_R2_ENDPOINT: tam host adresi. R2 için boş bırakılırsa OM_R2_ACCOUNT_ID'den otomatik

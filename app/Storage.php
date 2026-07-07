@@ -1,18 +1,23 @@
 <?php
 
 // Görsel depolama soyutlaması. Öncelik sırası:
-// 1) imgbb.com — kart istemez, imzalama gerektirmez, tek API key (bkz. putImgbb)
-// 2) S3 uyumlu bir servis (Cloudflare R2, Backblaze B2 vb.) ayarlıysa oraya yükler
-// 3) İkisi de yoksa (yerel geliştirme) eskisi gibi yerel diske yazar.
+// 1) Cloudinary — kart istemez, sunucudan-sunucuya (server-to-server) yüklemeye izin verir
+// 2) imgbb.com — ARTIK Render'da ÇALIŞMIYOR: imgbb, datacenter/bulut IP'lerinden gelen
+//    yüklemeleri "you have been forbidden to use this website" (kod 103) ile engelliyor
+//    (2026-07-07'de canlıda tespit edildi — yerelden test ederken çalışıyordu çünkü ev IP'si
+//    kullanılıyordu). Kod yedek olarak duruyor ama production'da hiçbir zaman devreye girmemeli.
+// 3) S3 uyumlu bir servis (Cloudflare R2, Backblaze B2 vb.) ayarlıysa oraya yükler
+// 4) Hiçbiri yoksa (yerel geliştirme) eskisi gibi yerel diske yazar.
 // Render gibi platformlarda disk kalıcı olmadığı için görseller her deploy'da silinir,
-// bu yüzden production'da 1 veya 2'nin ayarlı olması önerilir.
+// bu yüzden production'da 1, 2 veya 3'ün ayarlı olması ZORUNLU.
 // composer/vendor yok — AWS Signature V4 imzalama elle (Mailer.php'deki ham soket
 // yaklaşımıyla aynı ruhta) yapılıyor.
 class Storage
 {
     public static function isRemoteConfigured(): bool
     {
-        return OM_IMGBB_API_KEY !== ''
+        return OM_CLOUDINARY_CLOUD_NAME !== ''
+            || OM_IMGBB_API_KEY !== ''
             || (OM_R2_ENDPOINT !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '');
     }
 
@@ -20,6 +25,12 @@ class Storage
     {
         if (!is_uploaded_file($tmpPath)) {
             return null;
+        }
+        if (OM_CLOUDINARY_CLOUD_NAME !== '') {
+            $url = self::putCloudinary($tmpPath);
+            if ($url !== null) {
+                return $url;
+            }
         }
         if (OM_IMGBB_API_KEY !== '') {
             $url = self::putImgbb($tmpPath);
@@ -35,6 +46,37 @@ class Storage
             }
         }
         return self::putLocal($tmpPath, $key);
+    }
+
+    private static function putCloudinary(string $tmpPath): ?string
+    {
+        $timestamp = time();
+        $signature = sha1("timestamp=$timestamp" . OM_CLOUDINARY_API_SECRET);
+
+        $ch = curl_init('https://api.cloudinary.com/v1_1/' . OM_CLOUDINARY_CLOUD_NAME . '/image/upload');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'file' => new CURLFile($tmpPath),
+                'api_key' => OM_CLOUDINARY_API_KEY,
+                'timestamp' => $timestamp,
+                'signature' => $signature,
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+        $response = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($status < 200 || $status >= 300 || $response === false) {
+            error_log("Cloudinary yükleme hatası (HTTP $status): " . ($curlError ?: $response));
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        return $data['secure_url'] ?? null;
     }
 
     private static function putImgbb(string $tmpPath): ?string
