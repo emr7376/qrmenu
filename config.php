@@ -26,9 +26,13 @@ define('OM_UPLOAD_DIR', OM_ROOT . '/public/uploads');
 define('OM_UPLOAD_URL', '/uploads');
 
 // Görsel depolama (logo/galeri/ürün fotoğrafları) — Render'da disk kalıcı olmadığı için
-// her deploy'da yerel dosyalar silinir. Herhangi bir S3 UYUMLU servis (Cloudflare R2,
-// Backblaze B2, vb.) bilgileri girilirse app/Storage.php görselleri oraya yükler.
-// Boş bırakılırsa (yerel geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
+// her deploy'da yerel dosyalar silinir.
+// ÖNCELİK 1: imgbb.com — kart istemez, imzalama gerektirmez, tek API key ile çalışır
+// (R2/Backblaze B2 "public bucket" adımında kart istediği için tercih edildi).
+define('OM_IMGBB_API_KEY', getenv('OM_IMGBB_API_KEY') ?: '');
+// ÖNCELİK 2 (opsiyonel/yedek): Herhangi bir S3 UYUMLU servis (Cloudflare R2, Backblaze B2, vb.)
+// bilgileri girilirse app/Storage.php görselleri oraya yükler.
+// İkisi de boşsa (yerel geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
 // OM_R2_ENDPOINT: tam host adresi. R2 için boş bırakılırsa OM_R2_ACCOUNT_ID'den otomatik
 // üretilir ({account_id}.r2.cloudflarestorage.com). Backblaze B2 için tam endpoint'i
 // (örn. s3.us-west-000.backblazeb2.com) doğrudan buraya yaz, ACCOUNT_ID'ye gerek yok.

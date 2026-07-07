@@ -1,15 +1,19 @@
 <?php
 
-// Görsel depolama soyutlaması. Cloudflare R2 (S3 uyumlu) ayarlıysa oraya yükler —
-// Render gibi platformlarda disk kalıcı olmadığı için görseller her deploy'da
-// silinmesin diye. R2 ayarlı değilse (yerel geliştirme) eskisi gibi yerel diske yazar.
+// Görsel depolama soyutlaması. Öncelik sırası:
+// 1) imgbb.com — kart istemez, imzalama gerektirmez, tek API key (bkz. putImgbb)
+// 2) S3 uyumlu bir servis (Cloudflare R2, Backblaze B2 vb.) ayarlıysa oraya yükler
+// 3) İkisi de yoksa (yerel geliştirme) eskisi gibi yerel diske yazar.
+// Render gibi platformlarda disk kalıcı olmadığı için görseller her deploy'da silinir,
+// bu yüzden production'da 1 veya 2'nin ayarlı olması önerilir.
 // composer/vendor yok — AWS Signature V4 imzalama elle (Mailer.php'deki ham soket
 // yaklaşımıyla aynı ruhta) yapılıyor.
 class Storage
 {
     public static function isRemoteConfigured(): bool
     {
-        return OM_R2_ENDPOINT !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '';
+        return OM_IMGBB_API_KEY !== ''
+            || (OM_R2_ENDPOINT !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '');
     }
 
     public static function put(string $tmpPath, string $key, string $mime): ?string
@@ -17,14 +21,43 @@ class Storage
         if (!is_uploaded_file($tmpPath)) {
             return null;
         }
-        if (self::isRemoteConfigured()) {
+        if (OM_IMGBB_API_KEY !== '') {
+            $url = self::putImgbb($tmpPath);
+            if ($url !== null) {
+                return $url;
+            }
+            // imgbb başarısız olursa (ör. geçici kesinti) hizmeti kesmemek için diğer yollara düş.
+        }
+        if (OM_R2_ENDPOINT !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '') {
             $url = self::putR2($tmpPath, $key, $mime);
             if ($url !== null) {
                 return $url;
             }
-            // R2 yüklemesi başarısız olursa hizmeti kesmemek için yerel diske düş.
         }
         return self::putLocal($tmpPath, $key);
+    }
+
+    private static function putImgbb(string $tmpPath): ?string
+    {
+        $ch = curl_init('https://api.imgbb.com/1/upload?key=' . urlencode(OM_IMGBB_API_KEY));
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => ['image' => new CURLFile($tmpPath)],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+        $response = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($status < 200 || $status >= 300 || $response === false) {
+            error_log("imgbb yükleme hatası (HTTP $status): $curlError");
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        return $data['data']['url'] ?? null;
     }
 
     private static function putLocal(string $tmpPath, string $key): string
