@@ -22,7 +22,7 @@ function redirect(string $path): void
     exit;
 }
 
-function flash(string $key, ?string $message = null)
+function flash(string $key, string|array|null $message = null)
 {
     if ($message !== null) {
         $_SESSION['flash'][$key] = $message;
