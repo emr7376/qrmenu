@@ -16,6 +16,12 @@ require OM_ROOT . '/app/OwnerAuth.php';
 require OM_ROOT . '/app/controllers/OwnerController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
+// HEAD istekleri (UptimeRobot gibi izleme servislerinin kullandığı) GET route'larıyla
+// eşleştirilir; gövde çıktısı PHP'nin kendi SAPI davranışıyla zaten bastırılır.
+$isHeadRequest = $method === 'HEAD';
+if ($isHeadRequest) {
+    $method = 'GET';
+}
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = rtrim($path, '/');
 if ($path === '') {
