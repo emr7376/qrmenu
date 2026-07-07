@@ -1,4 +1,4 @@
-<?php $bodyClass = 'site-public'; include OM_ROOT . '/app/views/layout/header.php'; ?>
+<?php $bodyClass = 'site-public'; $showStaffLink = true; include OM_ROOT . '/app/views/layout/header.php'; ?>
 
 <div class="landing">
 

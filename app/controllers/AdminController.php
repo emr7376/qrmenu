@@ -112,13 +112,8 @@ class AdminController
         if (!isset($allowed[$mime])) {
             return null;
         }
-        $dir = OM_UPLOAD_DIR . '/' . $restaurantId;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0775, true);
-        }
         $filename = uniqid('item_', true) . '.' . $allowed[$mime];
-        move_uploaded_file($_FILES['image']['tmp_name'], $dir . '/' . $filename);
-        return OM_UPLOAD_URL . '/' . $restaurantId . '/' . $filename;
+        return Storage::put($_FILES['image']['tmp_name'], $restaurantId . '/' . $filename, $mime);
     }
 
     public static function createProduct(): void
@@ -534,13 +529,11 @@ class AdminController
             $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
             $mime = mime_content_type($_FILES['logo']['tmp_name']);
             if (isset($allowed[$mime])) {
-                $dir = OM_UPLOAD_DIR . '/' . $restaurant['id'];
-                if (!is_dir($dir)) {
-                    mkdir($dir, 0775, true);
-                }
                 $filename = 'qrlogo_' . uniqid() . '.' . $allowed[$mime];
-                move_uploaded_file($_FILES['logo']['tmp_name'], $dir . '/' . $filename);
-                $logoPath = OM_UPLOAD_URL . '/' . $restaurant['id'] . '/' . $filename;
+                $uploaded = Storage::put($_FILES['logo']['tmp_name'], $restaurant['id'] . '/' . $filename, $mime);
+                if ($uploaded !== null) {
+                    $logoPath = $uploaded;
+                }
             }
         }
 

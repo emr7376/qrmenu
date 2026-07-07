@@ -1,4 +1,4 @@
-<?php $bodyClass = 'site-public'; include OM_ROOT . '/app/views/layout/header.php'; ?>
+<?php $bodyClass = 'site-public'; $showStaffLink = true; include OM_ROOT . '/app/views/layout/header.php'; ?>
 <div class="container">
     <div class="auth-box card" style="max-width:460px;">
         <div style="display:flex;gap:8px;margin-bottom:20px;">

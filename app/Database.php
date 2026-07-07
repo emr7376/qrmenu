@@ -8,7 +8,9 @@ class Database
     {
         if (self::$conn === null) {
             if (OM_DB_HOST) {
-                $m = new mysqli(OM_DB_HOST, OM_DB_USER, OM_DB_PASS, OM_DB_NAME, OM_DB_PORT);
+                $m = mysqli_init();
+                $m->ssl_set(null, null, null, null, null);
+                $m->real_connect(OM_DB_HOST, OM_DB_USER, OM_DB_PASS, OM_DB_NAME, OM_DB_PORT, null, MYSQLI_CLIENT_SSL);
             } else {
                 $m = new mysqli(null, OM_DB_USER, OM_DB_PASS, OM_DB_NAME, null, OM_DB_SOCKET);
             }

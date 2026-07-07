@@ -25,6 +25,16 @@ define('OM_GOOGLE_MAPS_API_KEY', getenv('OM_GOOGLE_MAPS_API_KEY') ?: '');
 define('OM_UPLOAD_DIR', OM_ROOT . '/public/uploads');
 define('OM_UPLOAD_URL', '/uploads');
 
+// Görsel depolama (logo/galeri/ürün fotoğrafları) — Render'da disk kalıcı olmadığı için
+// her deploy'da yerel dosyalar silinir. Cloudflare R2 (S3 uyumlu, ücretsiz katmanı var)
+// bilgileri girilirse app/Storage.php görselleri oraya yükler. Boş bırakılırsa (yerel
+// geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
+define('OM_R2_ACCOUNT_ID', getenv('OM_R2_ACCOUNT_ID') ?: '');
+define('OM_R2_ACCESS_KEY', getenv('OM_R2_ACCESS_KEY') ?: '');
+define('OM_R2_SECRET_KEY', getenv('OM_R2_SECRET_KEY') ?: '');
+define('OM_R2_BUCKET', getenv('OM_R2_BUCKET') ?: '');
+define('OM_R2_PUBLIC_URL', getenv('OM_R2_PUBLIC_URL') ?: ''); // örn. https://pub-xxxx.r2.dev veya kendi domainin
+
 // iyzico (ödeme sağlayıcısı) — sandbox key'lerini https://sandbox-merchant.iyzipay.com üzerinden
 // onay beklemeden hemen alabilirsin. Canlıya geçerken OM_IYZICO_BASE_URL'i production'a
 // (https://api.iyzipay.com) çevirip gerçek (onaylı üye iş yeri) key'lerini gir.

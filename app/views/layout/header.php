@@ -10,7 +10,12 @@
 <body class="<?= e($bodyClass ?? '') ?>">
 <div class="navbar">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" class="brand">QRMenü</a>
+        <div style="display:flex;align-items:baseline;gap:14px;">
+            <a href="/" class="brand">QRMenü</a>
+            <?php if (!empty($showStaffLink)): ?>
+                <a href="/superadmin/login" style="color:var(--color-muted);font-size:0.78rem;">Personel Girişi</a>
+            <?php endif; ?>
+        </div>
         <nav>
             <?php if (Auth::check()): ?>
                 <a href="/admin">Panelim</a>
