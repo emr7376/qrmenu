@@ -28,21 +28,36 @@ class Mailer
 
     private static function sendViaSmtp(string $toEmail, string $toName, string $subject, string $body): bool
     {
-        $socket = @fsockopen(OM_SMTP_HOST, OM_SMTP_PORT, $errno, $errstr, 10);
+        // 465 = örtük TLS (bağlantı en baştan şifreli açılır, STARTTLS adımı yok).
+        // 587 = STARTTLS (düz bağlanıp sonra şifrelemeye yükseltilir). Bazı hosting
+        // sağlayıcıları (Render'ın ücretsiz katmanı dahil) 587'den çıkışı engelliyor,
+        // bu yüzden 465 destekleniyor.
+        if ((int) OM_SMTP_PORT === 465) {
+            $socket = @stream_socket_client(
+                'ssl://' . OM_SMTP_HOST . ':465',
+                $errno,
+                $errstr,
+                10,
+                STREAM_CLIENT_CONNECT
+            );
+        } else {
+            $socket = @fsockopen(OM_SMTP_HOST, OM_SMTP_PORT, $errno, $errstr, 10);
+        }
         if (!$socket) {
             throw new Exception('Bağlantı kurulamadı: ' . $errstr);
         }
 
         self::readResponse($socket, 220);
         self::command($socket, 'EHLO qrmenu.local', 250);
-        self::command($socket, 'STARTTLS', 220);
 
-        if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-            fclose($socket);
-            throw new Exception('TLS başlatılamadı.');
+        if ((int) OM_SMTP_PORT !== 465) {
+            self::command($socket, 'STARTTLS', 220);
+            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                fclose($socket);
+                throw new Exception('TLS başlatılamadı.');
+            }
+            self::command($socket, 'EHLO qrmenu.local', 250);
         }
-
-        self::command($socket, 'EHLO qrmenu.local', 250);
         self::command($socket, 'AUTH LOGIN', 334);
         self::command($socket, base64_encode(OM_SMTP_USER), 334);
         self::command($socket, base64_encode(OM_SMTP_PASS), 235);
