@@ -26,14 +26,19 @@ define('OM_UPLOAD_DIR', OM_ROOT . '/public/uploads');
 define('OM_UPLOAD_URL', '/uploads');
 
 // Görsel depolama (logo/galeri/ürün fotoğrafları) — Render'da disk kalıcı olmadığı için
-// her deploy'da yerel dosyalar silinir. Cloudflare R2 (S3 uyumlu, ücretsiz katmanı var)
-// bilgileri girilirse app/Storage.php görselleri oraya yükler. Boş bırakılırsa (yerel
-// geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
+// her deploy'da yerel dosyalar silinir. Herhangi bir S3 UYUMLU servis (Cloudflare R2,
+// Backblaze B2, vb.) bilgileri girilirse app/Storage.php görselleri oraya yükler.
+// Boş bırakılırsa (yerel geliştirme) eskisi gibi public/uploads klasörüne yazılır — sistem kırılmaz.
+// OM_R2_ENDPOINT: tam host adresi. R2 için boş bırakılırsa OM_R2_ACCOUNT_ID'den otomatik
+// üretilir ({account_id}.r2.cloudflarestorage.com). Backblaze B2 için tam endpoint'i
+// (örn. s3.us-west-000.backblazeb2.com) doğrudan buraya yaz, ACCOUNT_ID'ye gerek yok.
 define('OM_R2_ACCOUNT_ID', getenv('OM_R2_ACCOUNT_ID') ?: '');
 define('OM_R2_ACCESS_KEY', getenv('OM_R2_ACCESS_KEY') ?: '');
 define('OM_R2_SECRET_KEY', getenv('OM_R2_SECRET_KEY') ?: '');
 define('OM_R2_BUCKET', getenv('OM_R2_BUCKET') ?: '');
-define('OM_R2_PUBLIC_URL', getenv('OM_R2_PUBLIC_URL') ?: ''); // örn. https://pub-xxxx.r2.dev veya kendi domainin
+define('OM_R2_ENDPOINT', getenv('OM_R2_ENDPOINT') ?: (OM_R2_ACCOUNT_ID !== '' ? OM_R2_ACCOUNT_ID . '.r2.cloudflarestorage.com' : ''));
+define('OM_R2_REGION', getenv('OM_R2_REGION') ?: 'auto'); // R2 için "auto" kalsın; Backblaze B2 için gerçek bölge kodu (örn. us-west-000) gir
+define('OM_R2_PUBLIC_URL', getenv('OM_R2_PUBLIC_URL') ?: ''); // örn. https://pub-xxxx.r2.dev veya B2'nin verdiği friendly URL
 
 // iyzico (ödeme sağlayıcısı) — sandbox key'lerini https://sandbox-merchant.iyzipay.com üzerinden
 // onay beklemeden hemen alabilirsin. Canlıya geçerken OM_IYZICO_BASE_URL'i production'a

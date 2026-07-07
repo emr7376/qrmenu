@@ -9,7 +9,7 @@ class Storage
 {
     public static function isRemoteConfigured(): bool
     {
-        return OM_R2_ACCOUNT_ID !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '';
+        return OM_R2_ENDPOINT !== '' && OM_R2_ACCESS_KEY !== '' && OM_R2_SECRET_KEY !== '' && OM_R2_BUCKET !== '';
     }
 
     public static function put(string $tmpPath, string $key, string $mime): ?string
@@ -45,7 +45,7 @@ class Storage
             return null;
         }
 
-        $host = OM_R2_ACCOUNT_ID . '.r2.cloudflarestorage.com';
+        $host = OM_R2_ENDPOINT;
         $headers = self::signRequest('PUT', $key, $body, $mime, $host);
 
         $ch = curl_init('https://' . $host . '/' . OM_R2_BUCKET . '/' . $key);
@@ -69,10 +69,12 @@ class Storage
         return rtrim(OM_R2_PUBLIC_URL, '/') . '/' . $key;
     }
 
-    // AWS Signature Version 4 — Cloudflare R2, S3 API'siyle uyumlu olduğu için aynı imzalama kullanılır.
+    // AWS Signature Version 4 — Cloudflare R2 ve Backblaze B2, S3 API'siyle uyumlu olduğu için aynı imzalama kullanılır.
+    // R2 "auto" bölgesini kabul eder; Backblaze B2 gerçek bölge kodunu (örn. us-west-000) ister,
+    // bu yüzden OM_R2_REGION ayarlanabilir (varsayılan "auto").
     private static function signRequest(string $method, string $key, string $body, string $mime, string $host): array
     {
-        $region = 'auto';
+        $region = OM_R2_REGION;
         $service = 's3';
         $amzDate = gmdate('Ymd\THis\Z');
         $dateStamp = gmdate('Ymd');
