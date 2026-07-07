@@ -51,12 +51,17 @@ define('OM_IYZICO_API_KEY', getenv('OM_IYZICO_API_KEY') ?: '');
 define('OM_IYZICO_SECRET_KEY', getenv('OM_IYZICO_SECRET_KEY') ?: '');
 define('OM_IYZICO_BASE_URL', getenv('OM_IYZICO_BASE_URL') ?: 'https://sandbox-api.iyzipay.com');
 
-// Giriş yaparken e-postaya gönderilen tek kullanımlık doğrulama kodu (2FA) için
-// ÜCRETSİZ Gmail SMTP kullanılıyor (composer/vendor yok, app/Mailer.php bağımlısız ham soket ile gönderiyor).
+// Giriş yaparken e-postaya gönderilen tek kullanımlık doğrulama kodu (2FA) için.
+// ÖNCELİK 1: Brevo (brevo.com) HTTP API — ücretsiz (günde 300 e-posta), kart istemez.
+// Render gibi platformlar SMTP portlarını (25/465/587) tamamen engellediği için asıl
+// yöntem bu. Brevo'da "Senders" bölümünden OM_SMTP_USER'daki adresi doğrulaman gerekir.
+define('OM_BREVO_API_KEY', getenv('OM_BREVO_API_KEY') ?: '');
+// ÖNCELİK 2 (yedek/yerel geliştirme): Gmail SMTP — composer/vendor yok, app/Mailer.php
+// bağımsız ham soket ile gönderiyor. Render'ın ücretsiz katmanında ÇALIŞMIYOR (port engeli).
 // OM_SMTP_USER: kodu gönderecek Gmail adresin.
 // OM_SMTP_PASS: normal Gmail şifren DEĞİL — Google Hesabı > Güvenlik > 2 Adımlı Doğrulama açık olmalı,
 // sonra "Uygulama Şifreleri" (App Passwords) ile üretilen 16 haneli özel şifre buraya girilir.
-// Boş bırakılırsa kod e-postayla gönderilmez, sadece log'a yazılır (geliştirme modu) — sistem kırılmaz.
+// İkisi de boşsa kod e-postayla gönderilmez, sadece log'a yazılır (geliştirme modu) — sistem kırılmaz.
 define('OM_SMTP_HOST', getenv('OM_SMTP_HOST') ?: 'smtp.gmail.com');
 define('OM_SMTP_PORT', (int) (getenv('OM_SMTP_PORT') ?: 587));
 define('OM_SMTP_USER', getenv('OM_SMTP_USER') ?: '');
