@@ -21,6 +21,8 @@ envVarGroups:
         sync: false
       - key: OM_SMTP_PASS
         sync: false
+      - key: OM_IMGBB_API_KEY
+        sync: false
       - key: OM_R2_ACCOUNT_ID
         sync: false
       - key: OM_R2_ACCESS_KEY
@@ -29,6 +31,10 @@ envVarGroups:
         sync: false
       - key: OM_R2_BUCKET
         sync: false
+      - key: OM_R2_ENDPOINT
+        sync: false
+      - key: OM_R2_REGION
+        value: auto
       - key: OM_R2_PUBLIC_URL
         sync: false
       - key: OM_GOOGLE_MAPS_API_KEY
