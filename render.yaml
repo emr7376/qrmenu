@@ -1,0 +1,59 @@
+envVarGroups:
+  - name: qrmenu-shared
+    envVars:
+      - key: OM_DB_HOST
+        sync: false
+      - key: OM_DB_PORT
+        sync: false
+      - key: OM_DB_NAME
+        sync: false
+      - key: OM_DB_USER
+        sync: false
+      - key: OM_DB_PASS
+        sync: false
+      - key: OM_IYZICO_API_KEY
+        sync: false
+      - key: OM_IYZICO_SECRET_KEY
+        sync: false
+      - key: OM_IYZICO_BASE_URL
+        value: https://sandbox-api.iyzipay.com
+      - key: OM_SMTP_USER
+        sync: false
+      - key: OM_SMTP_PASS
+        sync: false
+      - key: OM_R2_ACCOUNT_ID
+        sync: false
+      - key: OM_R2_ACCESS_KEY
+        sync: false
+      - key: OM_R2_SECRET_KEY
+        sync: false
+      - key: OM_R2_BUCKET
+        sync: false
+      - key: OM_R2_PUBLIC_URL
+        sync: false
+      - key: OM_GOOGLE_MAPS_API_KEY
+        sync: false
+
+services:
+  # Ana web uygulaması
+  - type: web
+    name: qrmenu
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: OM_ENV
+        value: production
+      - fromGroup: qrmenu-shared
+
+  # Her gece 03:00'te (UTC) çalışıp deneme süresi bitmiş/ödeme günü gelmiş
+  # restoranların kayıtlı kartından otomatik tahsilat yapar (bin/charge-subscriptions.php).
+  - type: cron
+    name: qrmenu-billing
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: php bin/charge-subscriptions.php
+    schedule: "0 3 * * *"
+    envVars:
+      - key: OM_ENV
+        value: production
+      - fromGroup: qrmenu-shared
