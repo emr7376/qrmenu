@@ -52,7 +52,7 @@ class Storage
         curl_close($ch);
 
         if ($status < 200 || $status >= 300 || $response === false) {
-            error_log("imgbb yükleme hatası (HTTP $status): $curlError");
+            error_log("imgbb yükleme hatası (HTTP $status): " . ($curlError ?: $response));
             return null;
         }
 
