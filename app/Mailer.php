@@ -13,19 +13,27 @@ class Mailer
             . "Bu kod 10 dakika içinde geçerliliğini yitirecektir. Bu girişi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.\r\n\r\n"
             . "QRMenü";
 
-        // ÖNCELİK 1: Brevo HTTP API — Render gibi platformlar SMTP portlarını (25/465/587)
+        // ÖNCELİK 1: Resend HTTP API — Render gibi platformlar SMTP portlarını (25/465/587)
         // tamamen engellediği için (spam önleme), HTTPS üzerinden çalışan bir API şart oldu.
+        if (OM_RESEND_API_KEY !== '') {
+            try {
+                return self::sendViaResend($toEmail, $toName, $subject, $body);
+            } catch (Exception $e) {
+                error_log('[Mailer] Resend gönderim hatası: ' . $e->getMessage());
+                // Resend başarısız olursa Brevo/SMTP'ye düşmeyi dene.
+            }
+        }
+
         if (OM_BREVO_API_KEY !== '') {
             try {
                 return self::sendViaBrevo($toEmail, $toName, $subject, $body);
             } catch (Exception $e) {
                 error_log('[Mailer] Brevo gönderim hatası: ' . $e->getMessage());
-                // Brevo başarısız olursa SMTP'ye düşmeyi dene (yerelde SMTP çalışabilir).
             }
         }
 
         if (OM_SMTP_USER === '' || OM_SMTP_PASS === '') {
-            error_log('[Mailer] Ne Brevo ne SMTP yapılandırılmadı, kod sadece log\'a yazılıyor. ' . $toEmail . ' -> ' . $code);
+            error_log('[Mailer] Hiçbir e-posta servisi yapılandırılmadı, kod sadece log\'a yazılıyor. ' . $toEmail . ' -> ' . $code);
             return false;
         }
 
@@ -35,6 +43,40 @@ class Mailer
             error_log('[Mailer] SMTP gönderim hatası: ' . $e->getMessage());
             return false;
         }
+    }
+
+    private static function sendViaResend(string $toEmail, string $toName, string $subject, string $body): bool
+    {
+        // Resend'de domain doğrulanmadıysa gönderen adresi zorunlu olarak "onboarding@resend.dev"
+        // olmalı ve sadece hesap sahibinin kendi doğruladığı adrese gönderim yapılabilir (sandbox kısıtı).
+        $payload = json_encode([
+            'from' => OM_SMTP_FROM_NAME . ' <onboarding@resend.dev>',
+            'to' => [$toEmail],
+            'subject' => $subject,
+            'text' => $body,
+        ]);
+
+        $ch = curl_init('https://api.resend.com/emails');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . OM_RESEND_API_KEY,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 15,
+        ]);
+        $response = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($status < 200 || $status >= 300) {
+            throw new Exception("HTTP $status: " . ($curlError ?: $response));
+        }
+
+        return true;
     }
 
     private static function sendViaBrevo(string $toEmail, string $toName, string $subject, string $body): bool
