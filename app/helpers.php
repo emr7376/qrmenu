@@ -88,18 +88,29 @@ function formatMenuPrice(float $price): string
     return $amount . '<span class="currency">₺</span>';
 }
 
+function requestScheme(): string
+{
+    // Render gibi platformlarda SSL proxy'de sonlandırılıp PHP'ye düz HTTP olarak iletiliyor -
+    // bu yüzden $_SERVER['HTTPS'] boş kalıyor, proxy'nin standart X-Forwarded-Proto header'ına da bakmak gerekiyor.
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return 'https';
+    }
+    if (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') {
+        return 'https';
+    }
+    return 'http';
+}
+
 function menuUrl(string $slug): string
 {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
-    return $scheme . '://' . $host . '/menu/' . $slug;
+    return requestScheme() . '://' . $host . '/menu/' . $slug;
 }
 
 function canonicalUrl(string $path = ''): string
 {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
-    return $scheme . '://' . $host . $path;
+    return requestScheme() . '://' . $host . $path;
 }
 
 function csrfToken(): string
