@@ -95,6 +95,13 @@ function menuUrl(string $slug): string
     return $scheme . '://' . $host . '/menu/' . $slug;
 }
 
+function canonicalUrl(string $path = ''): string
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
+    return $scheme . '://' . $host . $path;
+}
+
 function csrfToken(): string
 {
     if (empty($_SESSION['csrf_token'])) {

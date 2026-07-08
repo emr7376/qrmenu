@@ -7,7 +7,8 @@ class AuthController
         $db = Database::get();
         $plans = $db->query('SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order ASC')->fetch_all(MYSQLI_ASSOC);
         view('auth/login', [
-            'title' => 'Giriş Yap / Üye Ol - QR Menü',
+            'title' => 'Ücretsiz Üye Ol - QR Menü ile Dijital Restoran Menüsü Oluşturun',
+            'metaDescription' => 'QRMenü\'ye ücretsiz üye olun, restoranınız için QR kodlu dijital menünüzü 5 dakikada oluşturun. 7 gün ücretsiz deneme, kredi kartı gerekmez.',
             'plans' => $plans,
             'error' => flash('error'),
             'signupError' => flash('signup_error'),

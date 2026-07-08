@@ -389,7 +389,16 @@ class AdminController
         );
         $dailyStmt->bind_param('i', $restaurantId);
         $dailyStmt->execute();
-        $daily = $dailyStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $dailyRows = $dailyStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $countsByDay = [];
+        foreach ($dailyRows as $row) {
+            $countsByDay[$row['day']] = (int) $row['c'];
+        }
+        $daily = [];
+        for ($i = 13; $i >= 0; $i--) {
+            $day = (new DateTime())->modify("-$i days")->format('Y-m-d');
+            $daily[] = ['day' => $day, 'c' => $countsByDay[$day] ?? 0];
+        }
 
         view('admin/analytics', [
             'title' => 'Analitik - QR Menü',

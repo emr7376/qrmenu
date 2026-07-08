@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin
+Disallow: /superadmin
+Disallow: /cron
+
+Sitemap: https://qrmenus.onrender.com/sitemap.xml
