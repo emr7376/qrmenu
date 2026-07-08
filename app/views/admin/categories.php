@@ -26,7 +26,7 @@
                 <tr>
                     <td><?= e($cat['name']) ?></td>
                     <td style="text-align:right;">
-                        <form method="post" action="/admin/categories/<?= (int) $cat['id'] ?><?= csrfField() ?>/delete" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz? İçindeki ürünler kategorisiz kalır.');">
+                        <form method="post" action="/admin/categories/<?= (int) $cat['id'] ?>/delete" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz? İçindeki ürünler kategorisiz kalır.');"><?= csrfField() ?>
                             <button type="submit" class="btn small danger">Sil</button>
                         </form>
                     </td>

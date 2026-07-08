@@ -26,7 +26,7 @@
                     <td><span class="badge <?= $item['is_available'] ? 'open' : 'closed' ?>"><?= $item['is_available'] ? 'Satışta' : 'Pasif' ?></span></td>
                     <td style="white-space:nowrap;">
                         <a href="/admin/products/<?= (int) $item['id'] ?>/edit" class="btn small secondary">Düzenle</a>
-                        <form method="post" action="/admin/products/<?= (int) $item['id'] ?><?= csrfField() ?>/delete" style="display:inline;" onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                        <form method="post" action="/admin/products/<?= (int) $item['id'] ?>/delete" style="display:inline;" onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');"><?= csrfField() ?>
                             <button type="submit" class="btn small danger">Sil</button>
                         </form>
                     </td>

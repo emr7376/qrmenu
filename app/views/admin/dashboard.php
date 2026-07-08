@@ -2,7 +2,7 @@
 
 <div class="toolbar">
     <h2>Merhaba, <?= e($restaurant['name']) ?></h2>
-    <form method="post" action="/admin/toggle" onsubmit="return confirm('<?= $restaurant['is_open'] ? 'Menünüzü kapatmak istediğinize emin misiniz?' : 'Menünüzü tekrar açmak istiyor musunuz?' ?><?= csrfField() ?>');">
+    <form method="post" action="/admin/toggle" onsubmit="return confirm('<?= $restaurant['is_open'] ? 'Menünüzü kapatmak istediğinize emin misiniz?' : 'Menünüzü tekrar açmak istiyor musunuz?' ?>');"><?= csrfField() ?>
         <button type="submit" class="btn <?= $restaurant['is_open'] ? 'danger' : '' ?>">
             <?= $restaurant['is_open'] ? 'Menüyü Kapat' : 'Menüyü Aç' ?>
         </button>

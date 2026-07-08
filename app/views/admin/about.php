@@ -51,7 +51,7 @@
             <?php foreach ($gallery as $photo): ?>
                 <div style="position:relative;">
                     <img src="<?= e($photo['image_path']) ?>" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;">
-                    <form method="post" action="/admin/gallery/<?= (int) $photo['id'] ?><?= csrfField() ?>/delete" onsubmit="return confirm('Bu fotoğrafı silmek istediğinize emin misiniz?');" style="margin-top:6px;">
+                    <form method="post" action="/admin/gallery/<?= (int) $photo['id'] ?>/delete" onsubmit="return confirm('Bu fotoğrafı silmek istediğinize emin misiniz?');" style="margin-top:6px;"><?= csrfField() ?>
                         <button type="submit" class="btn small danger" style="width:100%;">Sil</button>
                     </form>
                 </div>
