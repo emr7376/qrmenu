@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS restaurants (
     contact_address VARCHAR(255) NULL,
     contact_instagram VARCHAR(150) NULL,
     contact_whatsapp VARCHAR(50) NULL,
+    contact_facebook VARCHAR(190) NULL,
+    contact_x VARCHAR(190) NULL,
     latitude DECIMAL(10,7) NULL,
     longitude DECIMAL(10,7) NULL,
     about_text TEXT NULL,

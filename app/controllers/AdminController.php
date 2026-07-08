@@ -294,14 +294,14 @@ class AdminController
         $address = trim($_POST['contact_address'] ?? '');
         $instagram = trim($_POST['contact_instagram'] ?? '');
         $whatsapp = trim($_POST['contact_whatsapp'] ?? '');
-        $latitude = is_numeric($_POST['latitude'] ?? '') ? (float) $_POST['latitude'] : null;
-        $longitude = is_numeric($_POST['longitude'] ?? '') ? (float) $_POST['longitude'] : null;
+        $facebook = trim($_POST['contact_facebook'] ?? '');
+        $x = trim($_POST['contact_x'] ?? '');
 
         $db = Database::get();
         $stmt = $db->prepare(
-            'UPDATE restaurants SET contact_phone = ?, contact_address = ?, contact_instagram = ?, contact_whatsapp = ?, latitude = ?, longitude = ? WHERE id = ?'
+            'UPDATE restaurants SET contact_phone = ?, contact_address = ?, contact_instagram = ?, contact_whatsapp = ?, contact_facebook = ?, contact_x = ? WHERE id = ?'
         );
-        $stmt->bind_param('ssssddi', $phone, $address, $instagram, $whatsapp, $latitude, $longitude, $restaurant['id']);
+        $stmt->bind_param('ssssssi', $phone, $address, $instagram, $whatsapp, $facebook, $x, $restaurant['id']);
         $stmt->execute();
 
         flash('success', 'Bilgiler güncellendi.');

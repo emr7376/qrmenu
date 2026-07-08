@@ -48,13 +48,15 @@
         </div>
     <?php endif; ?>
 
-    <?php if ($restaurant['contact_phone'] || $restaurant['contact_address'] || $restaurant['contact_instagram'] || $restaurant['contact_whatsapp']): ?>
+    <?php if ($restaurant['contact_phone'] || $restaurant['contact_address'] || $restaurant['contact_instagram'] || $restaurant['contact_whatsapp'] || $restaurant['contact_facebook'] || $restaurant['contact_x']): ?>
         <div class="contact-box">
             <h3><?= e(t('contact_title')) ?></h3>
             <?php if ($restaurant['contact_phone']): ?><p><?= menuIcon('phone') ?> <?= e($restaurant['contact_phone']) ?></p><?php endif; ?>
             <?php if ($restaurant['contact_address']): ?><p><?= menuIcon('pin') ?> <?= e($restaurant['contact_address']) ?></p><?php endif; ?>
             <?php if ($restaurant['contact_whatsapp']): ?><p><?= menuIcon('chat') ?> WhatsApp: <?= e($restaurant['contact_whatsapp']) ?></p><?php endif; ?>
             <?php if ($restaurant['contact_instagram']): ?><p><?= menuIcon('camera') ?> <?= e($restaurant['contact_instagram']) ?></p><?php endif; ?>
+            <?php if ($restaurant['contact_facebook']): ?><p><?= menuIcon('facebook') ?> <?= e($restaurant['contact_facebook']) ?></p><?php endif; ?>
+            <?php if ($restaurant['contact_x']): ?><p><?= menuIcon('x') ?> <?= e($restaurant['contact_x']) ?></p><?php endif; ?>
         </div>
     <?php endif; ?>
 </div>
