@@ -8,6 +8,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-site-verification" content="ZvfQm4hz3Kd1DCgNOApmNq1Z8hT1t3PrE97plyr_wd4" />
     <title><?= $pageTitle ?></title>
     <meta name="description" content="<?= e($metaDescription) ?>">
     <meta name="robots" content="index, follow">
