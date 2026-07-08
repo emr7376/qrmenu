@@ -14,6 +14,8 @@ require OM_ROOT . '/app/controllers/AdminController.php';
 require OM_ROOT . '/app/controllers/MenuController.php';
 require OM_ROOT . '/app/OwnerAuth.php';
 require OM_ROOT . '/app/controllers/OwnerController.php';
+require OM_ROOT . '/app/SubscriptionBiller.php';
+require OM_ROOT . '/app/controllers/CronController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 // HEAD istekleri (UptimeRobot gibi izleme servislerinin kullandığı) GET route'larıyla
@@ -55,6 +57,7 @@ $routes = [
         '#^/superadmin/plans$#' => [OwnerController::class, 'plans'],
         '#^/superadmin/database$#' => [OwnerController::class, 'database'],
         '#^/superadmin/restaurants/new$#' => [OwnerController::class, 'newRestaurantForm'],
+        '#^/cron/charge-subscriptions$#' => [CronController::class, 'chargeSubscriptions'],
     ],
     'POST' => [
         '#^/login$#' => [AuthController::class, 'login'],

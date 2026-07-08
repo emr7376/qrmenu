@@ -79,6 +79,11 @@ define('OM_SMTP_FROM_NAME', 'QRMenü');
 // Render gibi platformlarda "production" set edilir — o zaman hata detayları ekrana basılmaz (güvenlik).
 define('OM_IS_PRODUCTION', getenv('OM_ENV') === 'production');
 
+// Ücretsiz dış cron pinger (örn. cron-job.org) ile GET /cron/charge-subscriptions?key=... tetiklemek için.
+// Render'ın ücretsiz katmanında gerçek sunucu cron'u olmadığından bu yol kullanılıyor.
+// Boşsa endpoint her zaman 403 döner (varsayılan olarak devre dışı, güvenli).
+define('OM_CRON_SECRET', getenv('OM_CRON_SECRET') ?: '');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
