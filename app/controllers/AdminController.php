@@ -47,6 +47,9 @@ class AdminController
     public static function dashboard(): void
     {
         $restaurant = self::guard();
+        if (!$restaurant['onboarding_completed']) {
+            redirect('/admin/onboarding');
+        }
         $productCount = self::productCount((int) $restaurant['id']);
         $trial = currentTrialInfo($restaurant);
         view('admin/dashboard', [

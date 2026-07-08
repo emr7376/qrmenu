@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
     subscription_status ENUM('trial','active','expired','canceled') NOT NULL DEFAULT 'trial',
     trial_ends_at DATETIME NOT NULL,
     is_open TINYINT(1) NOT NULL DEFAULT 1,
+    onboarding_completed TINYINT(1) NOT NULL DEFAULT 0, -- ilk kayıt sonrası kurulum sihirbazı (bkz. OnboardingController) tamamlandı/atlandı mı
     qr_color VARCHAR(7) NOT NULL DEFAULT '#24201d',
     qr_logo_path VARCHAR(255) NULL,
     theme_color VARCHAR(7) NULL, -- can_customize_theme (Premium) planındaki restoranın kendi public menüsündeki aksan rengi

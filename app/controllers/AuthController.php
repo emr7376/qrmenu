@@ -203,6 +203,6 @@ class AuthController
         $insert->execute();
 
         Auth::attempt($email, $password);
-        redirect('/admin');
+        redirect('/admin/onboarding');
     }
 }

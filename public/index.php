@@ -16,6 +16,7 @@ require OM_ROOT . '/app/OwnerAuth.php';
 require OM_ROOT . '/app/controllers/OwnerController.php';
 require OM_ROOT . '/app/SubscriptionBiller.php';
 require OM_ROOT . '/app/controllers/CronController.php';
+require OM_ROOT . '/app/controllers/OnboardingController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 // HEAD istekleri (UptimeRobot gibi izleme servislerinin kullandığı) GET route'larıyla
@@ -37,6 +38,8 @@ $routes = [
         '#^/login/verify$#' => [AuthController::class, 'showVerify'],
         '#^/logout$#' => [AuthController::class, 'logout'],
         '#^/admin$#' => [AdminController::class, 'dashboard'],
+        '#^/admin/onboarding$#' => [OnboardingController::class, 'show'],
+        '#^/admin/onboarding/finish$#' => [OnboardingController::class, 'finish'],
         '#^/admin/products$#' => [AdminController::class, 'products'],
         '#^/admin/products/new$#' => [AdminController::class, 'newProductForm'],
         '#^/admin/products/(\d+)/edit$#' => [AdminController::class, 'editProductForm'],
@@ -64,6 +67,7 @@ $routes = [
         '#^/login/verify$#' => [AuthController::class, 'verifyCode'],
         '#^/login/verify/resend$#' => [AuthController::class, 'resendCode'],
         '#^/signup$#' => [AuthController::class, 'signup'],
+        '#^/admin/onboarding/product$#' => [OnboardingController::class, 'addFirstProduct'],
         '#^/admin/products/new$#' => [AdminController::class, 'createProduct'],
         '#^/admin/products/(\d+)/edit$#' => [AdminController::class, 'updateProduct'],
         '#^/admin/products/(\d+)/delete$#' => [AdminController::class, 'deleteProduct'],
