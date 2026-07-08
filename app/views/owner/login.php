@@ -15,7 +15,7 @@
     <div class="auth-box card">
         <h2>Yönetici Girişi</h2>
         <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
-        <form method="post" action="/superadmin/login">
+        <form method="post" action="/superadmin/login"><?= csrfField() ?>
             <div class="form-group">
                 <label>E-posta</label>
                 <input type="email" name="email" required>

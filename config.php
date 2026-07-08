@@ -85,6 +85,15 @@ define('OM_IS_PRODUCTION', getenv('OM_ENV') === 'production');
 define('OM_CRON_SECRET', getenv('OM_CRON_SECRET') ?: '');
 
 if (session_status() === PHP_SESSION_NONE) {
+    // iyzico'nun hosted ödeme sayfasından POST ile dönen tek cross-site istek (/admin/payment/callback)
+    // olduğu için SameSite=Strict kullanılmıyor; Lax modern tarayıcılarda zaten varsayılan davranış.
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'httponly' => true,
+        'secure' => OM_IS_PRODUCTION,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 

@@ -39,7 +39,7 @@ class MenuController
         $db = Database::get();
         $stmt = $db->prepare(
             'SELECT mi.*, mc.name AS category_name, mc.sort_order AS category_sort
-             FROM menu_items mi LEFT JOIN menu_categories mc ON mc.id = mi.category_id
+             FROM menu_items mi LEFT JOIN menu_categories mc ON mc.id = mi.category_id AND mc.restaurant_id = mi.restaurant_id
              WHERE mi.restaurant_id = ? AND mi.is_available = 1
              ORDER BY COALESCE(mc.sort_order, 0) ASC, mc.id ASC, mi.sort_order ASC, mi.id ASC'
         );

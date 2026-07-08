@@ -14,6 +14,19 @@ class AdminController
         return $restaurant;
     }
 
+    private static function resolveOwnedCategoryId(?int $categoryId, int $restaurantId): ?int
+    {
+        if (!$categoryId) {
+            return null;
+        }
+        $db = Database::get();
+        $stmt = $db->prepare('SELECT id FROM menu_categories WHERE id = ? AND restaurant_id = ?');
+        $stmt->bind_param('ii', $categoryId, $restaurantId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        return $row ? (int) $row['id'] : null;
+    }
+
     private static function blockIfExpired(array $restaurant, string $redirectTo): void
     {
         if ($restaurant['subscription_status'] === 'expired') {
@@ -52,7 +65,7 @@ class AdminController
         $db = Database::get();
         $stmt = $db->prepare(
             'SELECT mi.*, mc.name AS category_name FROM menu_items mi
-             LEFT JOIN menu_categories mc ON mc.id = mi.category_id
+             LEFT JOIN menu_categories mc ON mc.id = mi.category_id AND mc.restaurant_id = mi.restaurant_id
              WHERE mi.restaurant_id = ? ORDER BY mi.sort_order ASC, mi.id DESC'
         );
         $stmt->bind_param('i', $restaurant['id']);
@@ -95,6 +108,8 @@ class AdminController
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
+    private const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
+
     private static function handleImageUpload(array $restaurant): ?string
     {
         if (!$restaurant['can_upload_images']) {
@@ -105,6 +120,9 @@ class AdminController
             return null;
         }
         if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+        if ($_FILES['image']['size'] > self::MAX_UPLOAD_BYTES) {
             return null;
         }
         $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
@@ -129,7 +147,9 @@ class AdminController
         $name = trim($_POST['name'] ?? '');
         $price = (float) str_replace(',', '.', $_POST['price'] ?? '0');
         $description = trim($_POST['description'] ?? '');
-        $categoryId = $restaurant['can_use_categories'] ? (int) ($_POST['category_id'] ?? 0) ?: null : null;
+        $categoryId = $restaurant['can_use_categories']
+            ? self::resolveOwnedCategoryId((int) ($_POST['category_id'] ?? 0) ?: null, (int) $restaurant['id'])
+            : null;
         $isFeatured = ($restaurant['can_feature_products'] && isset($_POST['is_featured'])) ? 1 : 0;
 
         if ($name === '') {
@@ -187,7 +207,9 @@ class AdminController
         $name = trim($_POST['name'] ?? '');
         $price = (float) str_replace(',', '.', $_POST['price'] ?? '0');
         $description = trim($_POST['description'] ?? '');
-        $categoryId = $restaurant['can_use_categories'] ? (int) ($_POST['category_id'] ?? 0) ?: null : null;
+        $categoryId = $restaurant['can_use_categories']
+            ? self::resolveOwnedCategoryId((int) ($_POST['category_id'] ?? 0) ?: null, (int) $restaurant['id'])
+            : null;
         $isAvailable = isset($_POST['is_available']) ? 1 : 0;
         $isFeatured = ($restaurant['can_feature_products'] && isset($_POST['is_featured'])) ? 1 : 0;
 
@@ -525,7 +547,7 @@ class AdminController
         }
 
         $logoPath = $restaurant['qr_logo_path'];
-        if (!empty($_FILES['logo']['name']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
+        if (!empty($_FILES['logo']['name']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK && $_FILES['logo']['size'] <= self::MAX_UPLOAD_BYTES) {
             $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
             $mime = mime_content_type($_FILES['logo']['tmp_name']);
             if (isset($allowed[$mime])) {
@@ -621,6 +643,15 @@ class AdminController
         }
 
         $result = Iyzico::retrieveCheckoutForm($token);
+
+        // Token başka bir restorana ait olabilir (ör. sızmış/tekrar kullanılmış token) - basketId
+        // initCheckoutForm'da restoran id'sine bağlanmıştı, oturumdaki restoranla eşleşmiyorsa reddet.
+        $expectedBasketId = 'sub-' . $restaurant['id'];
+        if (($result['basketId'] ?? null) !== $expectedBasketId) {
+            flash('error', 'Ödeme sonucu doğrulanamadı.');
+            redirect('/admin/payment');
+        }
+
         if (($result['status'] ?? '') !== 'success' || ($result['paymentStatus'] ?? 'SUCCESS') !== 'SUCCESS') {
             $db = Database::get();
             $log = $db->prepare('INSERT INTO payment_transactions (restaurant_id, amount, status, error_message) VALUES (?, ?, "failure", ?)');

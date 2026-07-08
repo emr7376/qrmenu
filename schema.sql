@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS restaurants (
     theme_color VARCHAR(7) NULL, -- can_customize_theme (Premium) planındaki restoranın kendi public menüsündeki aksan rengi
     login_otp_code VARCHAR(6) NULL, -- giriş e-posta doğrulama kodu (2FA), her girişte yeniden üretilir
     login_otp_expires_at DATETIME NULL,
+    login_otp_attempts INT NOT NULL DEFAULT 0, -- brute-force koruması: yeni kodda sıfırlanır, N başarısız denemeden sonra kod geçersiz sayılır
     logo_path VARCHAR(255) NULL,
     contact_phone VARCHAR(50) NULL,
     contact_address VARCHAR(255) NULL,

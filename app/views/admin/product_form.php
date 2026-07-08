@@ -5,7 +5,7 @@
 <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
 
 <div class="card" style="max-width:520px;">
-    <form method="post" action="<?= $item ? '/admin/products/' . (int) $item['id'] . '/edit' : '/admin/products/new' ?>" enctype="multipart/form-data">
+    <form method="post" action="<?= $item ? '/admin/products/' . (int) $item['id'] . '/edit' : '/admin/products/new' ?><?= csrfField() ?>" enctype="multipart/form-data">
         <div class="form-group">
             <label>Ürün Adı</label>
             <input type="text" name="name" value="<?= e($item['name'] ?? '') ?>" required>

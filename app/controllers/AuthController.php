@@ -44,6 +44,8 @@ class AuthController
         ]);
     }
 
+    private const MAX_OTP_ATTEMPTS = 5;
+
     public static function verifyCode(): void
     {
         $restaurantId = (int) ($_SESSION['login_otp_pending_id'] ?? 0);
@@ -53,10 +55,15 @@ class AuthController
 
         $code = trim($_POST['code'] ?? '');
         $db = Database::get();
-        $stmt = $db->prepare('SELECT login_otp_code, login_otp_expires_at FROM restaurants WHERE id = ?');
+        $stmt = $db->prepare('SELECT login_otp_code, login_otp_expires_at, login_otp_attempts FROM restaurants WHERE id = ?');
         $stmt->bind_param('i', $restaurantId);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
+
+        if ($row && (int) $row['login_otp_attempts'] >= self::MAX_OTP_ATTEMPTS) {
+            flash('error', 'Çok fazla hatalı deneme yaptınız. Lütfen yeni bir kod isteyin.');
+            redirect('/login/verify');
+        }
 
         $isValid = $row && $row['login_otp_code'] !== null
             && hash_equals((string) $row['login_otp_code'], $code)
@@ -64,11 +71,14 @@ class AuthController
             && new DateTime($row['login_otp_expires_at']) >= new DateTime();
 
         if (!$isValid) {
+            $fail = $db->prepare('UPDATE restaurants SET login_otp_attempts = login_otp_attempts + 1 WHERE id = ?');
+            $fail->bind_param('i', $restaurantId);
+            $fail->execute();
             flash('error', 'Kod hatalı veya süresi dolmuş.');
             redirect('/login/verify');
         }
 
-        $clear = $db->prepare('UPDATE restaurants SET login_otp_code = NULL, login_otp_expires_at = NULL WHERE id = ?');
+        $clear = $db->prepare('UPDATE restaurants SET login_otp_code = NULL, login_otp_expires_at = NULL, login_otp_attempts = 0 WHERE id = ?');
         $clear->bind_param('i', $restaurantId);
         $clear->execute();
 
@@ -77,12 +87,20 @@ class AuthController
         redirect('/admin');
     }
 
+    private const RESEND_COOLDOWN_SECONDS = 30;
+
     public static function resendCode(): void
     {
         $restaurantId = (int) ($_SESSION['login_otp_pending_id'] ?? 0);
         if ($restaurantId === 0) {
             redirect('/login');
         }
+        $lastSentAt = $_SESSION['login_otp_resent_at'] ?? 0;
+        if (time() - $lastSentAt < self::RESEND_COOLDOWN_SECONDS) {
+            flash('info', 'Yeni kod istemeden önce birkaç saniye bekleyin.');
+            redirect('/login/verify');
+        }
+        $_SESSION['login_otp_resent_at'] = time();
         $db = Database::get();
         $stmt = $db->prepare('SELECT id, name, email FROM restaurants WHERE id = ?');
         $stmt->bind_param('i', $restaurantId);
@@ -102,7 +120,7 @@ class AuthController
         $expiresAt = (new DateTime())->modify('+10 minutes')->format('Y-m-d H:i:s');
 
         $db = Database::get();
-        $stmt = $db->prepare('UPDATE restaurants SET login_otp_code = ?, login_otp_expires_at = ? WHERE id = ?');
+        $stmt = $db->prepare('UPDATE restaurants SET login_otp_code = ?, login_otp_expires_at = ?, login_otp_attempts = 0 WHERE id = ?');
         $stmt->bind_param('ssi', $code, $expiresAt, $restaurant['id']);
         $stmt->execute();
 

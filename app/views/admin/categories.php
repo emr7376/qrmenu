@@ -7,7 +7,7 @@
 <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
 
 <div class="card" style="max-width:480px;">
-    <form method="post" action="/admin/categories" style="display:flex;gap:10px;align-items:flex-end;">
+    <form method="post" action="/admin/categories" style="display:flex;gap:10px;align-items:flex-end;"><?= csrfField() ?>
         <div class="form-group" style="flex:1;margin-bottom:0;">
             <label>Yeni Kategori Adı</label>
             <input type="text" name="name" required>
@@ -26,7 +26,7 @@
                 <tr>
                     <td><?= e($cat['name']) ?></td>
                     <td style="text-align:right;">
-                        <form method="post" action="/admin/categories/<?= (int) $cat['id'] ?>/delete" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz? İçindeki ürünler kategorisiz kalır.');">
+                        <form method="post" action="/admin/categories/<?= (int) $cat['id'] ?><?= csrfField() ?>/delete" onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz? İçindeki ürünler kategorisiz kalır.');">
                             <button type="submit" class="btn small danger">Sil</button>
                         </form>
                     </td>

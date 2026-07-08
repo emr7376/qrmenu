@@ -14,7 +14,7 @@
 <?php if ($restaurant['can_customize_theme']): ?>
 <div class="card" style="max-width:420px;">
     <h3>QR Görünümünü Özelleştir</h3>
-    <form method="post" action="/admin/qr" enctype="multipart/form-data">
+    <form method="post" action="/admin/qr" enctype="multipart/form-data"><?= csrfField() ?>
         <div class="form-group">
             <label>Renk</label>
             <input type="color" name="qr_color" value="<?= e($restaurant['qr_color'] ?? '#24201d') ?>" style="width:70px;height:40px;padding:2px;">
@@ -33,7 +33,7 @@
 <div class="card" style="max-width:420px;">
     <h3>Menü Sitenizin Rengi</h3>
     <p style="color:var(--color-muted);font-size:0.88rem;margin-top:-8px;">Müşterilerinizin gördüğü menü sitesindeki vurgu rengini (fiyatlar, rozetler, ikonlar) markanıza göre değiştirin.</p>
-    <form method="post" action="/admin/theme">
+    <form method="post" action="/admin/theme"><?= csrfField() ?>
         <div class="form-group">
             <label>Vurgu Rengi</label>
             <input type="color" name="theme_color" value="<?= e($restaurant['theme_color'] ?? '#9c8452') ?>" style="width:70px;height:40px;padding:2px;">

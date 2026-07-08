@@ -9,7 +9,7 @@
 
 <div class="plans">
     <?php foreach ($plans as $plan): ?>
-        <form method="post" action="/superadmin/plans/<?= (int) $plan['id'] ?>" class="plan-card plan-edit-card">
+        <form method="post" action="/superadmin/plans/<?= (int) $plan['id'] ?><?= csrfField() ?>" class="plan-card plan-edit-card">
             <div class="form-group">
                 <label>Plan Adı</label>
                 <input type="text" name="name" value="<?= e($plan['name']) ?>">

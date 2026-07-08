@@ -65,7 +65,7 @@
                 <td><?= (int) $r['product_count'] ?></td>
                 <td><?= (new DateTime($r['trial_ends_at']))->format('d.m.Y') ?></td>
                 <td>
-                    <form method="post" action="/superadmin/restaurants/<?= (int) $r['id'] ?>" style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
+                    <form method="post" action="/superadmin/restaurants/<?= (int) $r['id'] ?><?= csrfField() ?>" style="display:flex;flex-direction:column;gap:6px;min-width:180px;">
                         <select name="plan_id">
                             <?php foreach ($plans as $p): ?>
                                 <option value="<?= (int) $p['id'] ?>" <?= $p['id'] == $r['plan_id'] ? 'selected' : '' ?>><?= e($p['name']) ?></option>

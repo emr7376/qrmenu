@@ -2,7 +2,7 @@
 
 <div class="toolbar">
     <h2>Merhaba, <?= e($restaurant['name']) ?></h2>
-    <form method="post" action="/admin/toggle" onsubmit="return confirm('<?= $restaurant['is_open'] ? 'Menünüzü kapatmak istediğinize emin misiniz?' : 'Menünüzü tekrar açmak istiyor musunuz?' ?>');">
+    <form method="post" action="/admin/toggle" onsubmit="return confirm('<?= $restaurant['is_open'] ? 'Menünüzü kapatmak istediğinize emin misiniz?' : 'Menünüzü tekrar açmak istiyor musunuz?' ?><?= csrfField() ?>');">
         <button type="submit" class="btn <?= $restaurant['is_open'] ? 'danger' : '' ?>">
             <?= $restaurant['is_open'] ? 'Menüyü Kapat' : 'Menüyü Aç' ?>
         </button>
@@ -57,7 +57,7 @@
 <div class="card danger-zone">
     <h3>Üyeliği İptal Et</h3>
     <p>Üyeliğinizi iptal ederseniz menünüz anında müşterilere kapanır ve panelinize erişiminiz kısıtlanır. Ürünleriniz ve verileriniz silinmez, dilediğiniz zaman bizimle iletişime geçip tekrar aktif edebilirsiniz.</p>
-    <form method="post" action="/admin/cancel-membership" onsubmit="return confirm('Üyeliğinizi iptal etmek istediğinize emin misiniz? Menünüz hemen kapanacak.');">
+    <form method="post" action="/admin/cancel-membership" onsubmit="return confirm('Üyeliğinizi iptal etmek istediğinize emin misiniz? Menünüz hemen kapanacak.');"><?= csrfField() ?>
         <button type="submit" class="btn danger">Üyeliği İptal Et</button>
     </form>
 </div>

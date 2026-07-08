@@ -7,7 +7,7 @@
 <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
 
 <div class="card" style="max-width:520px;">
-    <form method="post" action="/admin/contact">
+    <form method="post" action="/admin/contact"><?= csrfField() ?>
         <div class="form-group">
             <label>Telefon</label>
             <input type="text" name="contact_phone" value="<?= e($restaurant['contact_phone'] ?? '') ?>" placeholder="0555 555 55 55">

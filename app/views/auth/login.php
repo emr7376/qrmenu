@@ -8,7 +8,7 @@
 
         <div id="pane-login">
             <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
-            <form method="post" action="/login">
+            <form method="post" action="/login"><?= csrfField() ?>
                 <div class="form-group">
                     <label>E-posta</label>
                     <input type="email" name="email" required>
@@ -24,7 +24,7 @@
         <div id="pane-signup" style="display:none;">
             <p style="color:#666;margin-top:0;"><?= (int) OM_TRIAL_DAYS ?> gün ücretsiz deneme ile hemen başlayın.</p>
             <?php if ($signupError): ?><div class="alert error"><?= e($signupError) ?></div><?php endif; ?>
-            <form method="post" action="/signup">
+            <form method="post" action="/signup"><?= csrfField() ?>
                 <div class="form-group">
                     <label>Restoran Adı</label>
                     <input type="text" name="name" value="<?= e($old['name'] ?? '') ?>" required>

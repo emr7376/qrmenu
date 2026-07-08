@@ -92,6 +92,14 @@ if ($method === 'GET' && $path === '/signup') {
     redirect('/login');
 }
 
+// iyzico'nun kendi sunucusundan POST ile dönen tek callback - bizim formumuzdan gelmediği için CSRF token'ı yok.
+$csrfExemptPaths = ['/admin/payment/callback'];
+if ($method === 'POST' && !in_array($path, $csrfExemptPaths, true) && !csrfValid()) {
+    http_response_code(419);
+    echo 'Oturumunuz zaman aşımına uğradı, lütfen sayfayı yenileyip tekrar deneyin.';
+    exit;
+}
+
 foreach ($routes[$method] ?? [] as $pattern => $handler) {
     if (preg_match($pattern, $path, $matches)) {
         array_shift($matches);

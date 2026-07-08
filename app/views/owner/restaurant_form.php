@@ -5,7 +5,7 @@
 </div>
 <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
 <div class="card" style="max-width:460px;">
-    <form method="post" action="/superadmin/restaurants/new">
+    <form method="post" action="/superadmin/restaurants/new"><?= csrfField() ?>
         <div class="form-group">
             <label>Restoran Adı</label>
             <input type="text" name="name" required>

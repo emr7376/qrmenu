@@ -94,3 +94,22 @@ function menuUrl(string $slug): string
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
     return $scheme . '://' . $host . '/menu/' . $slug;
 }
+
+function csrfToken(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrfField(): string
+{
+    return '<input type="hidden" name="_csrf" value="' . e(csrfToken()) . '">';
+}
+
+function csrfValid(): bool
+{
+    $token = $_POST['_csrf'] ?? '';
+    return is_string($token) && $token !== '' && hash_equals(csrfToken(), $token);
+}

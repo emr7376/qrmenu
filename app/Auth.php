@@ -10,6 +10,7 @@ class Auth
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
         if ($result && password_verify($password, $result['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['restaurant_id'] = (int) $result['id'];
             return true;
         }
@@ -32,6 +33,7 @@ class Auth
 
     public static function login(int $restaurantId): void
     {
+        session_regenerate_id(true);
         $_SESSION['restaurant_id'] = $restaurantId;
     }
 

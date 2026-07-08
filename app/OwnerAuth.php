@@ -10,6 +10,7 @@ class OwnerAuth
         $stmt->execute();
         $admin = $stmt->get_result()->fetch_assoc();
         if ($admin && password_verify($password, $admin['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['admin_id'] = (int) $admin['id'];
             return true;
         }
