@@ -94,6 +94,13 @@ if (session_status() === PHP_SESSION_NONE) {
         'secure' => OM_IS_PRODUCTION,
         'samesite' => 'Lax',
     ]);
+    // Session'lar dosya yerine DB'de tutulur — Render'ın ücretsiz katmanında container
+    // uyuyup yeniden başladığında yerel disk sıfırlanıyor, bu da rastgele "oturum zaman
+    // aşımı" (CSRF uyuşmazlığı) ve giriş sonrası tekrar login'e atılma hatalarına sebep
+    // oluyordu (2026-07-09). Bkz. app/DbSessionHandler.php ve schema.sql'deki sessions tablosu.
+    require_once OM_ROOT . '/app/Database.php';
+    require_once OM_ROOT . '/app/DbSessionHandler.php';
+    session_set_save_handler(new DbSessionHandler(), true);
     session_start();
 }
 

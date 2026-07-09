@@ -1,7 +1,7 @@
 <?php
 
 require __DIR__ . '/../config.php';
-require OM_ROOT . '/app/Database.php';
+require_once OM_ROOT . '/app/Database.php';
 require OM_ROOT . '/app/Storage.php';
 require OM_ROOT . '/app/Auth.php';
 require OM_ROOT . '/app/Mailer.php';

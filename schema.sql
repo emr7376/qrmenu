@@ -108,6 +108,17 @@ CREATE TABLE IF NOT EXISTS menu_visits (
     FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- PHP oturumları burada tutulur (bkz. app/DbSessionHandler.php) — Render'ın ücretsiz
+-- katmanında container uyuyup yeniden başladığında yerel disk (dolayısıyla dosya tabanlı
+-- session'lar) sıfırlanıyor, bu da giriş sırasında rastgele "oturum zaman aşımı" (CSRF
+-- token uyuşmazlığı) ve giriş yaptıktan hemen sonra tekrar login'e atılma hatalarına
+-- sebep oluyordu (2026-07-09'da tespit edildi). DB kalıcı olduğu için bu sorunu ortadan kaldırır.
+CREATE TABLE IF NOT EXISTS sessions (
+    id VARCHAR(128) PRIMARY KEY,
+    data MEDIUMTEXT NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS admins (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(190) NOT NULL UNIQUE,
