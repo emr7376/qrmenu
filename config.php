@@ -84,7 +84,11 @@ define('OM_IS_PRODUCTION', getenv('OM_ENV') === 'production');
 // Boşsa endpoint her zaman 403 döner (varsayılan olarak devre dışı, güvenli).
 define('OM_CRON_SECRET', getenv('OM_CRON_SECRET') ?: '');
 
-if (session_status() === PHP_SESSION_NONE) {
+// Public menü/anasayfa ziyaretleri (trafiğin büyük çoğunluğu) session'a hiç dokunmuyor
+// (CSRF formu yok, $_SESSION okuması yok) — bu sayfalarda session_start() çalıştırmak
+// her istekte DB'ye 2 gereksiz round-trip (read+write) ekliyordu. index.php bu istekler
+// için OM_SKIP_SESSION'ı true tanımlıyor.
+if (session_status() === PHP_SESSION_NONE && !(defined('OM_SKIP_SESSION') && OM_SKIP_SESSION)) {
     // iyzico'nun hosted ödeme sayfasından POST ile dönen tek cross-site istek (/admin/payment/callback)
     // olduğu için SameSite=Strict kullanılmıyor; Lax modern tarayıcılarda zaten varsayılan davranış.
     session_set_cookie_params([

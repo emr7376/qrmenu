@@ -6,6 +6,10 @@
 // container'ın hayat döngüsünden bağımsız hale getiriyoruz.
 class DbSessionHandler implements SessionHandlerInterface
 {
+    // read()'de görülen son değer — write() bununla aynıysa DB'ye dokunmuyoruz.
+    // Oturum verisi değişmeyen (çoğu) isteklerde bir round-trip'i tamamen elimine ediyor.
+    private ?string $lastRead = null;
+
     public function open($savePath, $sessionName): bool
     {
         // Tablo schema.sql'de tanımlı ve ilk deploy'da zaten oluşturuldu — burada her
@@ -25,11 +29,15 @@ class DbSessionHandler implements SessionHandlerInterface
         $stmt->bind_param('s', $id);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        return $row ? $row['data'] : '';
+        $this->lastRead = $row ? $row['data'] : '';
+        return $this->lastRead;
     }
 
     public function write($id, $data): bool
     {
+        if ($data === $this->lastRead) {
+            return true;
+        }
         $stmt = Database::get()->prepare(
             'INSERT INTO sessions (id, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?'
         );

@@ -1,5 +1,15 @@
 <?php
 
+// Session'ı sadece gerçekten gerekiyorsa başlat (bkz. config.php). CSRF/flash/auth hiçbiri
+// public menü/anasayfa GET'lerinde kullanılmıyor - bu istekler sitedeki tüm trafiğin büyük
+// çoğunluğunu oluşturduğu için her birinde session'a (dolayısıyla DB'ye) dokunmamak
+// ölçülebilir bir hız kazancı sağlıyor. Diğer her rota (admin/login/superadmin/onboarding,
+// tüm POST'lar) eskisi gibi session'ı eager başlatıyor.
+$omMethod = $_SERVER['REQUEST_METHOD'];
+$omPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') ?: '/';
+$omSessionFreePath = $omPath === '/' || preg_match('#^/menu/[a-z0-9-]+(/(hakkimizda|menu|konum))?$#', $omPath);
+define('OM_SKIP_SESSION', $omMethod === 'GET' && $omSessionFreePath);
+
 require __DIR__ . '/../config.php';
 require_once OM_ROOT . '/app/Database.php';
 require OM_ROOT . '/app/Storage.php';
@@ -50,6 +60,7 @@ $routes = [
         '#^/admin/qr$#' => [AdminController::class, 'qr'],
         '#^/admin/payment$#' => [AdminController::class, 'paymentPage'],
         '#^/admin/payment/callback$#' => [AdminController::class, 'paymentCallback'],
+        '#^/admin/plan$#' => [AdminController::class, 'planPage'],
         '#^/menu/([a-z0-9-]+)$#' => [MenuController::class, 'home'],
         '#^/menu/([a-z0-9-]+)/hakkimizda$#' => [MenuController::class, 'about'],
         '#^/menu/([a-z0-9-]+)/menu$#' => [MenuController::class, 'menuPage'],
@@ -85,6 +96,7 @@ $routes = [
         '#^/admin/billing-info$#' => [AdminController::class, 'updateBillingInfo'],
         '#^/admin/payment/start$#' => [AdminController::class, 'startCardCheckout'],
         '#^/admin/payment/callback$#' => [AdminController::class, 'paymentCallback'],
+        '#^/admin/plan$#' => [AdminController::class, 'updatePlanSelf'],
         '#^/superadmin/login$#' => [OwnerController::class, 'login'],
         '#^/superadmin/restaurants/new$#' => [OwnerController::class, 'createRestaurant'],
         '#^/superadmin/restaurants/(\d+)$#' => [OwnerController::class, 'updateRestaurant'],
