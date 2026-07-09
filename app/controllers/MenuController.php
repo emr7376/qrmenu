@@ -6,7 +6,8 @@ class MenuController
     {
         $db = Database::get();
         $stmt = $db->prepare(
-            'SELECT r.*, p.can_use_categories, p.can_upload_images, p.can_customize_theme FROM restaurants r JOIN plans p ON p.id = r.plan_id WHERE r.slug = ?'
+            'SELECT r.*, p.can_use_categories, p.can_upload_images, p.can_customize_theme, p.can_feature_products
+             FROM restaurants r JOIN plans p ON p.id = r.plan_id WHERE r.slug = ?'
         );
         $stmt->bind_param('s', $slug);
         $stmt->execute();
@@ -14,7 +15,16 @@ class MenuController
         if (!$restaurant) {
             return null;
         }
-        return syncSubscriptionStatus($restaurant);
+        $restaurant = syncSubscriptionStatus($restaurant);
+        // Plan düşürüldüğünde (ör. premium'dan basic'e) o plana özel veriler (galeri,
+        // hakkımızda metni/logosu, kategori grupları, öne çıkan rozeti) silinmiyor —
+        // sadece mevcut plan bunları desteklemediği sürece public sitede gösterilmiyor.
+        // Plan tekrar yükseltilirse hepsi aynen geri görünür.
+        if (!$restaurant['can_upload_images']) {
+            $restaurant['about_text'] = null;
+            $restaurant['logo_path'] = null;
+        }
+        return $restaurant;
     }
 
     private static function isVisible(array $restaurant): bool
@@ -48,14 +58,14 @@ class MenuController
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    private static function groupItems(array $items): array
+    private static function groupItems(array $items, bool $categoriesEnabled, bool $featuredEnabled): array
     {
         $grouped = [];
         $featured = [];
         foreach ($items as $item) {
-            $key = $item['category_name'] ?? 'Menü';
+            $key = ($categoriesEnabled && $item['category_name']) ? $item['category_name'] : 'Menü';
             $grouped[$key][] = $item;
-            if (!empty($item['is_featured'])) {
+            if ($featuredEnabled && !empty($item['is_featured'])) {
                 $featured[] = $item;
             }
         }
@@ -88,7 +98,7 @@ class MenuController
         $visitStmt->bind_param('i', $restaurant['id']);
         $visitStmt->execute();
 
-        [, $featured] = self::groupItems(self::itemsFor($restaurant));
+        [, $featured] = self::groupItems(self::itemsFor($restaurant), (bool) $restaurant['can_use_categories'], (bool) $restaurant['can_feature_products']);
 
         view('menu/home', [
             'title' => $restaurant['name'] . ' - Anasayfa',
@@ -121,7 +131,7 @@ class MenuController
             return;
         }
 
-        [$grouped, $featured] = self::groupItems(self::itemsFor($restaurant));
+        [$grouped, $featured] = self::groupItems(self::itemsFor($restaurant), (bool) $restaurant['can_use_categories'], (bool) $restaurant['can_feature_products']);
 
         view('menu/menu', [
             'title' => 'Menü - ' . $restaurant['name'],

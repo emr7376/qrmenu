@@ -365,6 +365,61 @@ class AdminController
         redirect('/admin');
     }
 
+    public static function planPage(): void
+    {
+        $restaurant = self::guard();
+        $db = Database::get();
+        $plans = $db->query('SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order ASC')->fetch_all(MYSQLI_ASSOC);
+        view('admin/plan', [
+            'title' => 'Planımı Değiştir - QR Menü',
+            'restaurant' => $restaurant,
+            'plans' => $plans,
+            'success' => flash('success'),
+            'error' => flash('error'),
+        ]);
+    }
+
+    public static function updatePlanSelf(): void
+    {
+        $restaurant = self::guard();
+        $planId = (int) ($_POST['plan_id'] ?? 0);
+
+        $db = Database::get();
+        $stmt = $db->prepare('SELECT * FROM plans WHERE id = ? AND is_active = 1');
+        $stmt->bind_param('i', $planId);
+        $stmt->execute();
+        $plan = $stmt->get_result()->fetch_assoc();
+        if (!$plan) {
+            flash('error', 'Geçersiz plan seçimi.');
+            redirect('/admin/plan');
+        }
+
+        if ($planId === (int) $restaurant['plan_id'] && !in_array($restaurant['subscription_status'], ['canceled', 'expired'], true)) {
+            flash('error', 'Zaten bu plandasınız.');
+            redirect('/admin/plan');
+        }
+
+        // Ürün/kategori/görsel gibi mevcut veriler restaurant_id'ye bağlı, plan_id'ye değil —
+        // plan değişikliği (yükseltme ya da düşürme) bu verileri hiç silmez, sadece hangi
+        // özelliklerin panelde açık olduğunu değiştirir.
+        if (in_array($restaurant['subscription_status'], ['canceled', 'expired'], true)) {
+            $trialEndsAt = (new DateTime())->modify('+' . OM_TRIAL_DAYS . ' days')->format('Y-m-d H:i:s');
+            $stmt = $db->prepare(
+                "UPDATE restaurants SET plan_id = ?, subscription_status = 'trial', trial_ends_at = ?, is_open = 1 WHERE id = ?"
+            );
+            $stmt->bind_param('isi', $planId, $trialEndsAt, $restaurant['id']);
+            $stmt->execute();
+            flash('success', 'Üyeliğiniz yeniden aktifleştirildi ve planınız güncellendi. Menünüz tekrar müşterilere açık.');
+        } else {
+            $stmt = $db->prepare('UPDATE restaurants SET plan_id = ? WHERE id = ?');
+            $stmt->bind_param('ii', $planId, $restaurant['id']);
+            $stmt->execute();
+            flash('success', 'Planınız güncellendi: ' . $plan['name'] . '.');
+        }
+
+        redirect('/admin/plan');
+    }
+
     public static function analytics(): void
     {
         $restaurant = self::guard();

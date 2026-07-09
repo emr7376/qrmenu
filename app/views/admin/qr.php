@@ -56,11 +56,11 @@
         text: <?= json_encode($menuUrl) ?>,
         width: 240,
         height: 240,
-        colorDark: <?= json_encode($restaurant['qr_color'] ?? '#24201d') ?>,
+        colorDark: <?= json_encode($restaurant['can_customize_theme'] ? ($restaurant['qr_color'] ?? '#24201d') : '#24201d') ?>,
         colorLight: "#ffffff",
     });
 
-    <?php if (!empty($restaurant['qr_logo_path'])): ?>
+    <?php if ($restaurant['can_customize_theme'] && !empty($restaurant['qr_logo_path'])): ?>
     setTimeout(function () {
         const canvas = document.querySelector('#qrcode canvas');
         if (!canvas) return;

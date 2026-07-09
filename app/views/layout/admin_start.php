@@ -15,6 +15,7 @@
         <?php endif; ?>
         <a href="/admin/qr" class="<?= ($activeNav ?? '') === 'qr' ? 'active' : '' ?>">QR Kodum</a>
         <a href="/admin/payment" class="<?= ($activeNav ?? '') === 'payment' ? 'active' : '' ?>">Ödeme</a>
+        <a href="/admin/plan" class="<?= ($activeNav ?? '') === 'plan' ? 'active' : '' ?>">Planımı Değiştir</a>
         <a href="/menu/<?= e($restaurant['slug']) ?>" target="_blank">Menüyü Görüntüle ↗</a>
     </div>
     <div class="admin-content">
