@@ -33,6 +33,10 @@ class AdminController
             flash('error', 'Deneme/abonelik süreniz doldu. Düzenleme yapabilmek için planınızı yenilemeniz gerekir. Mevcut verileriniz siliniyor değil, sadece değişiklik yapamıyorsunuz.');
             redirect($redirectTo);
         }
+        if ($restaurant['subscription_status'] === 'canceled') {
+            flash('error', 'Üyeliğinizi iptal ettiniz. Düzenleme yapabilmek için üyeliğinizi yeniden aktive etmeniz gerekir. Mevcut verileriniz siliniyor değil, sadece değişiklik yapamıyorsunuz.');
+            redirect($redirectTo);
+        }
     }
 
     private static function productCount(int $restaurantId): int
@@ -336,7 +340,7 @@ class AdminController
     public static function toggleOpen(): void
     {
         $restaurant = self::guard();
-        if ($restaurant['subscription_status'] === 'expired') {
+        if (in_array($restaurant['subscription_status'], ['expired', 'canceled'], true)) {
             redirect('/admin');
         }
         $newState = $restaurant['is_open'] ? 0 : 1;

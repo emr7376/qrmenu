@@ -19,7 +19,7 @@ class MenuController
 
     private static function isVisible(array $restaurant): bool
     {
-        return $restaurant['is_open'] && $restaurant['subscription_status'] !== 'expired';
+        return $restaurant['is_open'] && !in_array($restaurant['subscription_status'], ['expired', 'canceled'], true);
     }
 
     private static function galleryFor(array $restaurant): array
