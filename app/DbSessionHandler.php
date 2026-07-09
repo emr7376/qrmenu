@@ -8,13 +8,9 @@ class DbSessionHandler implements SessionHandlerInterface
 {
     public function open($savePath, $sessionName): bool
     {
-        Database::get()->query(
-            "CREATE TABLE IF NOT EXISTS sessions (
-                id VARCHAR(128) PRIMARY KEY,
-                data MEDIUMTEXT NOT NULL,
-                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
+        // Tablo schema.sql'de tanımlı ve ilk deploy'da zaten oluşturuldu — burada her
+        // istekte CREATE TABLE çalıştırmak (eskiden yapılıyordu) gereksiz bir DDL
+        // sorgusuyla her sayfa yüklemesine gecikme ekliyordu.
         return true;
     }
 
